@@ -61,7 +61,7 @@ parseBoard xs
     bl = map words $ lines xs
 
 isValidSquare :: Square -> Bool
-isValidSquare (x, y) = x < 8 && y < 8
+isValidSquare (x, y) = x < 8 && x >= 0 && y < 8 && y >= 0
 
 isFree :: Board -> PlayerColor -> Square -> Either String Bool
 isFree b color s@(x, y)
@@ -72,8 +72,8 @@ isFree b color s@(x, y)
   where
     piece = b !! y !! x
 
-knightPossibs :: Board -> Square -> [Square]
-knightPossibs b s@(x, y) =
+knightPossibs :: Square -> [Square]
+knightPossibs s@(x, y) =
   [ (x + 1, y + 2)
   , (x - 1, y + 2)
   , (x - 2, y + 1)
@@ -90,16 +90,16 @@ pawnPossibs b c s@(x, y) =
     then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++ [(x, y + 2) | y == 1]
     else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++ [(x, y - 2) | y == 7]
 
-rookPossibs :: Board -> Square -> [Square]
-rookPossibs b s@(x, y) =
+rookPossibs :: Square -> [Square]
+rookPossibs s@(x, y) =
   [(x + n, y) | n <- [-7 .. 7]] ++ [(x, y + n) | n <- [-7 .. 7]]
 
-bishopPossibs :: Board -> Square -> [Square]
-bishopPossibs b s@(x, y) =
+bishopPossibs :: Square -> [Square]
+bishopPossibs s@(x, y) =
   [(x + n, y + n) | n <- [-7 .. 7]] ++ [(x - n, y + n) | n <- [-7 .. 7]]
 
-queenPossibs :: Board -> Square -> [Square]
-queenPossibs b s = rookPossibs b s ++ bishopPossibs b s
+queenPossibs :: Square -> [Square]
+queenPossibs s = rookPossibs s ++ bishopPossibs s
 
 getPossibs :: Board -> Square -> Either String [Square]
 getPossibs b s@(x, y)
@@ -115,14 +115,14 @@ getPossibs b s@(x, y)
     piece = b !! y !! x
     pt =
       case pieceType piece of
-        Knight -> knightPossibs b s
-        Rook -> rookPossibs b s
-        Bishop -> bishopPossibs b s
+        Knight -> knightPossibs s
+        Rook -> rookPossibs s
+        Bishop -> bishopPossibs s
         Pawn -> pawnPossibs b (pieceColor piece) s
-        Queen -> queenPossibs b s
+        Queen -> queenPossibs s
         _ -> error "A piece has has no moves please report this as a bug"
 
 main :: IO ()
 main = do
   f <- readFile "./b"
-  return ()
+  print ((\x -> getPossibs x (1, 0)) =<< parseBoard f)
