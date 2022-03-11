@@ -105,23 +105,12 @@ bishopPossibs b c s@(x, y)
   | not $ isValidSquare s = Left "Square is not valid"
   | otherwise =
     concat <$>
-    sequenceA
-      [ filterBlocked
-          b
-          c
-          (filter isValidSquare [(x - n, y - n) | n <- [1 .. 7]])
-      , filterBlocked
-          b
-          c
-          (filter isValidSquare [(x + n, y + n) | n <- [1 .. 7]])
-      , filterBlocked
-          b
-          c
-          (filter isValidSquare [(x + n, y - n) | n <- [1 .. 7]])
-      , filterBlocked
-          b
-          c
-          (filter isValidSquare [(x - n, y + n) | n <- [1 .. 7]])
+    traverse
+      (filterBlocked b c . filter isValidSquare)
+      [ [(x - n, y - n) | n <- [1 .. 7]]
+      , [(x + n, y + n) | n <- [1 .. 7]]
+      , [(x + n, y - n) | n <- [1 .. 7]]
+      , [(x - n, y + n) | n <- [1 .. 7]]
       ]
 
 rookPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
@@ -130,11 +119,12 @@ rookPossibs b c s@(x, y)
   | not $ isValidSquare s = Left "Square is not valid"
   | otherwise =
     concat <$>
-    sequenceA
-      [ filterBlocked b c (filter isValidSquare [(x, y + n) | n <- [1 .. 7]])
-      , filterBlocked b c (filter isValidSquare [(x, y - n) | n <- [1 .. 7]])
-      , filterBlocked b c (filter isValidSquare [(x + n, y) | n <- [1 .. 7]])
-      , filterBlocked b c (filter isValidSquare [(x - n, y) | n <- [1 .. 7]])
+    traverse
+      (filterBlocked b c . filter isValidSquare)
+      [ [(x, y + n) | n <- [1 .. 7]]
+      , [(x, y - n) | n <- [1 .. 7]]
+      , [(x + n, y) | n <- [1 .. 7]]
+      , [(x - n, y) | n <- [1 .. 7]]
       ]
 
 pawnPossibs :: Board -> PlayerColor -> Square -> [Square]
@@ -163,4 +153,4 @@ getPossibs b s@(x, y)
 main :: IO ()
 main = do
   f <- readFile "./b"
-  print ((\x -> getPossibs x (0, 0)) =<< parseBoard f)
+  print ((\x -> getPossibs x (2, 0)) =<< parseBoard f)
