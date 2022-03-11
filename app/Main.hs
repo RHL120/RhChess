@@ -1,5 +1,6 @@
 module Main where
 
+import Debug.Trace (trace)
 import Text.Printf (printf)
 
 data PlayerColor
@@ -27,6 +28,20 @@ data Piece
 type Board = [[Piece]]
 
 type Square = (Int, Int)
+
+filterBlocked :: Board -> PlayerColor -> [Square] -> Either String [Square]
+filterBlocked board color squares
+  | not $ boardIsFit board = Left "square is not valid"
+  | null squares = Right []
+  | otherwise = Right $ fb squares
+  where
+    fb [] = undefined
+    fb (s@(x, y):ss)
+      | piece == Empty = s : fb ss
+      | pieceColor piece /= color = [s]
+      | otherwise = []
+      where
+        piece = board !! y !! x
 
 readPieceType :: String -> Either String ChessPieceType
 readPieceType str =
@@ -84,45 +99,68 @@ knightPossibs s@(x, y) =
   , (x + 2, y + 1)
   ]
 
+bishopPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
+bishopPossibs b c s@(x, y)
+  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+  | not $ isValidSquare s = Left "Square is not valid"
+  | otherwise =
+    concat <$>
+    sequenceA
+      [ filterBlocked
+          b
+          c
+          (filter isValidSquare [(x - n, y - n) | n <- [1 .. 7]])
+      , filterBlocked
+          b
+          c
+          (filter isValidSquare [(x + n, y + n) | n <- [1 .. 7]])
+      , filterBlocked
+          b
+          c
+          (filter isValidSquare [(x + n, y - n) | n <- [1 .. 7]])
+      , filterBlocked
+          b
+          c
+          (filter isValidSquare [(x - n, y + n) | n <- [1 .. 7]])
+      ]
+
+rookPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
+rookPossibs b c s@(x, y)
+  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+  | not $ isValidSquare s = Left "Square is not valid"
+  | otherwise =
+    concat <$>
+    sequenceA
+      [ filterBlocked b c (filter isValidSquare [(x, y + n) | n <- [1 .. 7]])
+      , filterBlocked b c (filter isValidSquare [(x, y - n) | n <- [1 .. 7]])
+      , filterBlocked b c (filter isValidSquare [(x + n, y) | n <- [1 .. 7]])
+      , filterBlocked b c (filter isValidSquare [(x - n, y) | n <- [1 .. 7]])
+      ]
+
 pawnPossibs :: Board -> PlayerColor -> Square -> [Square]
 pawnPossibs b c s@(x, y) =
   if c == Black
     then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++ [(x, y + 2) | y == 1]
     else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++ [(x, y - 2) | y == 7]
 
-rookPossibs :: Square -> [Square]
-rookPossibs s@(x, y) =
-  [(x + n, y) | n <- [-7 .. 7]] ++ [(x, y + n) | n <- [-7 .. 7]]
-
-bishopPossibs :: Square -> [Square]
-bishopPossibs s@(x, y) =
-  [(x + n, y + n) | n <- [-7 .. 7]] ++ [(x - n, y + n) | n <- [-7 .. 7]]
-
-queenPossibs :: Square -> [Square]
-queenPossibs s = rookPossibs s ++ bishopPossibs s
-
 getPossibs :: Board -> Square -> Either String [Square]
 getPossibs b s@(x, y)
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
   | not $ isValidSquare s = Left "Square is not valid"
   | piece == Empty = Right []
-  | otherwise =
-    Right $
-    filter
-      (\z -> isFree b (pieceColor piece) z == Right True)
-      (filter isValidSquare pt)
+  | pt == Rook = rookPossibs b c s
+  | pt == Bishop = bishopPossibs b c s
+  | pt == Queen = do
+    bi <- bishopPossibs b c s
+    r <- rookPossibs b c s
+    return (bi ++ r)
+  | otherwise = error "Unknow piece please report this as a bug"
   where
     piece = b !! y !! x
-    pt =
-      case pieceType piece of
-        Knight -> knightPossibs s
-        Rook -> rookPossibs s
-        Bishop -> bishopPossibs s
-        Pawn -> pawnPossibs b (pieceColor piece) s
-        Queen -> queenPossibs s
-        _ -> error "A piece has has no moves please report this as a bug"
+    pt = pieceType piece
+    c = pieceColor piece
 
 main :: IO ()
 main = do
   f <- readFile "./b"
-  print ((\x -> getPossibs x (1, 0)) =<< parseBoard f)
+  print ((\x -> getPossibs x (0, 0)) =<< parseBoard f)
