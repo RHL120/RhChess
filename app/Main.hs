@@ -87,17 +87,23 @@ isFree b color s@(x, y)
   where
     piece = b !! y !! x
 
-knightPossibs :: Square -> [Square]
-knightPossibs s@(x, y) =
-  [ (x + 1, y + 2)
-  , (x - 1, y + 2)
-  , (x - 2, y + 1)
-  , (x - 2, y - 1)
-  , (x - 1, y - 2)
-  , (x + 1, y - 2)
-  , (x + 2, y - 1)
-  , (x + 2, y + 1)
-  ]
+knightPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
+knightPossibs b c s@(x, y)
+  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+  | not $ isValidSquare s = Left "Square is not valid"
+  | otherwise =
+    Right $
+    filter
+      (\z -> isValidSquare z && isFree b c z == Right True)
+      [ (x + 1, y + 2)
+      , (x - 1, y + 2)
+      , (x - 2, y + 1)
+      , (x - 2, y - 1)
+      , (x - 1, y - 2)
+      , (x + 1, y - 2)
+      , (x + 2, y - 1)
+      , (x + 2, y + 1)
+      ]
 
 bishopPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
 bishopPossibs b c s@(x, y)
@@ -127,11 +133,19 @@ rookPossibs b c s@(x, y)
       , [(x - n, y) | n <- [1 .. 7]]
       ]
 
-pawnPossibs :: Board -> PlayerColor -> Square -> [Square]
-pawnPossibs b c s@(x, y) =
-  if c == Black
-    then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++ [(x, y + 2) | y == 1]
-    else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++ [(x, y - 2) | y == 7]
+pawnPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
+pawnPossibs b c s@(x, y)
+  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+  | not $ isValidSquare s = Left "Invalid square"
+  | otherwise =
+    Right $ filter (\z -> isValidSquare z && isFree b c z == Right True) ps
+  where
+    ps =
+      if c == Black
+        then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++
+             [(x, y + 2) | y == 1]
+        else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++
+             [(x, y - 2) | y == 7]
 
 getPossibs :: Board -> Square -> Either String [Square]
 getPossibs b s@(x, y)
@@ -140,6 +154,8 @@ getPossibs b s@(x, y)
   | piece == Empty = Right []
   | pt == Rook = rookPossibs b c s
   | pt == Bishop = bishopPossibs b c s
+  | pt == Knight = knightPossibs b c s
+  | pt == Pawn = pawnPossibs b c s
   | pt == Queen = do
     bi <- bishopPossibs b c s
     r <- rookPossibs b c s
