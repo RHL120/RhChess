@@ -147,6 +147,24 @@ pawnPossibs b c s@(x, y)
         else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++
              [(x, y - 2) | y == 7]
 
+kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
+kingPossibs b c s@(x, y)
+  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+  | not $ isValidSquare s = Left "Invlid square"
+  | otherwise =
+    Right $
+    filter
+      (\z -> isValidSquare z && isFree b c z == Right True)
+      [ (x + 1, y)
+      , (x - 1, y)
+      , (x + 1, y + 1)
+      , (x - 1, y + 1)
+      , (x, y - 1)
+      , (x, y + 1)
+      , (x - 1, y + 1)
+      , (x - 1, y - 1)
+      ]
+
 getPossibs :: Board -> Square -> Either String [Square]
 getPossibs b s@(x, y)
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
@@ -156,6 +174,7 @@ getPossibs b s@(x, y)
   | pt == Bishop = bishopPossibs b c s
   | pt == Knight = knightPossibs b c s
   | pt == Pawn = pawnPossibs b c s
+  | pt == King = kingPossibs b c s
   | pt == Queen = do
     bi <- bishopPossibs b c s
     r <- rookPossibs b c s
