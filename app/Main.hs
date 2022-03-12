@@ -1,8 +1,10 @@
 module Main where
 
 import Lib
+import Visual
+
+import Diagrams.Backend.SVG.CmdLine
+import Diagrams.Prelude
 
 main :: IO ()
-main = do
-  f <- readFile "./b"
-  print ((\x -> getPossibs x (5, 7)) =<< parseBoard f)
+main = mainWith chessBoard
