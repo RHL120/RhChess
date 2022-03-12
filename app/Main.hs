@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Monad (join)
 import Debug.Trace (trace)
 import Text.Printf (printf)
 
@@ -28,6 +29,14 @@ data Piece
 type Board = [[Piece]]
 
 type Square = (Int, Int)
+
+data Move =
+  Move
+    { movePiece :: Piece
+    , moveDst :: Square
+    , moveSrc :: Square
+    }
+  deriving (Show, Eq)
 
 filterBlocked :: Board -> PlayerColor -> [Square] -> Either String [Square]
 filterBlocked board color squares
@@ -165,27 +174,34 @@ kingPossibs b c s@(x, y)
       , (x - 1, y - 1)
       ]
 
-getPossibs :: Board -> Square -> Either String [Square]
+getPossibs :: Board -> Square -> Either String [Move]
 getPossibs b s@(x, y)
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
   | not $ isValidSquare s = Left "Square is not valid"
   | piece == Empty = Right []
-  | pt == Rook = rookPossibs b c s
-  | pt == Bishop = bishopPossibs b c s
-  | pt == Knight = knightPossibs b c s
-  | pt == Pawn = pawnPossibs b c s
-  | pt == King = kingPossibs b c s
+  | pt == Rook = join $ Right $ map (\z -> Move piece z s) <$> rookPossibs b c s
+  | pt == Bishop =
+    join $ Right $ map (\z -> Move piece z s) <$> bishopPossibs b c s
+  | pt == Knight = toMove $ knightPossibs b c s
+  | pt == Pawn = toMove $ pawnPossibs b c s
+  | pt == King = toMove $ kingPossibs b c s
   | pt == Queen = do
     bi <- bishopPossibs b c s
     r <- rookPossibs b c s
-    return (bi ++ r)
+    return $ map (\z -> Move piece z s) (bi ++ r)
   | otherwise = error "Unknow piece please report this as a bug"
   where
     piece = b !! y !! x
     pt = pieceType piece
     c = pieceColor piece
+    toMove = join . Right . fmap (map (\z -> Move piece z s))
+
+boardPossibs :: Board -> PlayerColor -> Either String [Move]
+boardPossibs b c =
+  filter (\(Move x _ _) -> pieceColor x == c) . concat <$> -- no need to for empty here
+  traverse (getPossibs b) [(x, y) | x <- [1 .. 7], y <- [1 .. 7]]
 
 main :: IO ()
 main = do
   f <- readFile "./b"
-  print ((\x -> getPossibs x (2, 0)) =<< parseBoard f)
+  print ((\x -> getPossibs x (5, 7)) =<< parseBoard f)
