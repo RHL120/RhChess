@@ -1,11 +1,4 @@
-module Lib
-  ( Board
-  , Square
-  , Move
-  , getPossibs
-  , boardPossibs
-  , parseBoard
-  ) where
+module Lib where
 
 import Control.Monad (join)
 import Debug.Trace (trace)
