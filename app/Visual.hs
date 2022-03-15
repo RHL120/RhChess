@@ -47,7 +47,15 @@ pieceToString (Lib.Piece c t)
 drawPiece :: Lib.Piece -> Lib.Square -> Diagram B
 drawPiece = drawOnSquare . pieceToString
 
-drawBoard :: Lib.Board -> Diagram B
-drawBoard b =
+drawMove :: Lib.Move -> Diagram B
+drawMove (Lib.Move _ dst src)
+  | (squareToPoint dst) == (squareToPoint src) = mempty
+  | otherwise = arrowBetween (squareToPoint src) (squareToPoint (dst))
+
+drawMoves :: [Lib.Move] -> Diagram B
+drawMoves = mconcat . map drawMove
+
+drawBoard :: Lib.Board -> [Lib.Move] -> Diagram B
+drawBoard b possibs =
   mconcat ([drawPiece (b !! y !! x) (x, y) | x <- [0 .. 7], y <- [0 .. 7]]) <>
-  chessBoard
+  drawMoves possibs <> chessBoard

@@ -44,7 +44,7 @@ filterBlocked board color squares
   | null squares = Right []
   | otherwise = Right $ fb squares
   where
-    fb [] = undefined
+    fb [] = []
     fb (s@(x, y):ss)
       | piece == Empty = s : fb ss
       | pieceColor piece /= color = [s]
