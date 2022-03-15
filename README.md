@@ -13,14 +13,17 @@ The board is divided into rows an columns. Rows are spereated by newlines, colum
 Each column contains 2 charecters (cp with c being the color and p being the piece type),
 each row contains 8 columns and the board contains 8 rows. Empty columns are represented by ee.
 ## Example
-this is the board format for the initial point of a chess game:
+this variation
 ```
-br bn bb bq bk bb bn br
-bp bp bp bp bp bp bp bp
 ee ee ee ee ee ee ee ee
 ee ee ee ee ee ee ee ee
 ee ee ee ee ee ee ee ee
+ee ee ee bq ee ee ee ee
 ee ee ee ee ee ee ee ee
-wp wp wp wp wp wp wp wp
-wr wn wb wq wk wb wn wr
+ee ee ee ee ee ee ee ee
+ee ee ee ee bn ee ee ee
+ee ee ee ee ee ee ee ee
 ```
+gives out this image
+
+![Alt text](https://raw.githubusercontent.com/RHL120/RhChess/master/test.svg "example")
