@@ -15,7 +15,7 @@ boardImage str squares = do
 
 main :: IO ()
 main = do
-  f <- readFile "./b"
+  f <- readFile "./test"
   either
     putStrLn
     mainWith
