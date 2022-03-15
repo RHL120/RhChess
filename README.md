@@ -27,3 +27,6 @@ ee ee ee ee ee ee ee ee
 gives out this image
 
 ![Alt text](https://raw.githubusercontent.com/RHL120/RhChess/master/test.svg "example")
+##Side note
+For now I have not written a proper user interface so the board should be in ./test
+and the output will always be test.svg
