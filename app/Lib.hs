@@ -154,7 +154,7 @@ pawnPossibs b c s@(x, y)
         then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++
              [(x, y + 2) | y == 1]
         else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++
-             [(x, y - 2) | y == 7]
+             [(x, y - 2) | y == 6]
 
 kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
 kingPossibs b c s@(x, y)
