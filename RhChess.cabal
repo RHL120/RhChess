@@ -19,7 +19,7 @@ maintainer:         rhl120@protonmail.com
 -- A copyright notice.
 -- copyright:
 -- category:
-extra-source-files: CHANGELOG.md
+extra-source-files: CHANGELOG.md, ./test, ./test.svg
 
 executable RhChess
     main-is:          Main.hs
