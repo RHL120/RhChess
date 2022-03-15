@@ -147,14 +147,22 @@ pawnPossibs b c s@(x, y)
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
   | not $ isValidSquare s = Left "Invalid square"
   | otherwise =
-    Right $ filter (\z -> isValidSquare z && isFree b c z == Right True) ps
+    Right
+      (filter (\z -> isValidSquare z && isFree b c z == Right True) ps ++
+       attacks)
   where
     ps =
       if c == Black
-        then [(x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] ++
-             [(x, y + 2) | y == 1]
-        else [(x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] ++
-             [(x, y - 2) | y == 6]
+        then (x, y + 1) : [(x, y + 2) | y == 1]
+        else (x, y - 1) : [(x, y - 2) | y == 6]
+    attacks =
+      filter
+        (\z -> isValidSquare z && notFriend z)
+        (if c == Black
+           then [(x - 1, y + 1), (x + 1, y + 1)]
+           else [(x - 1, y - 1), (x + 1, y - 1)])
+    notFriend (x, y) =
+      not (b !! y !! x == Empty || pieceColor (b !! y !! x) == c)
 
 kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
 kingPossibs b c s@(x, y)
