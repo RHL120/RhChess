@@ -187,17 +187,17 @@ getPossibs b s@(x, y)
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
   | not $ isValidSquare s = Left "Square is not valid"
   | piece == Empty = Right []
-  | pt == Rook = join $ Right $ map (\z -> Move piece z s) <$> rookPossibs b c s
-  | pt == Bishop =
-    join $ Right $ map (\z -> Move piece z s) <$> bishopPossibs b c s
-  | pt == Knight = toMove $ knightPossibs b c s
-  | pt == Pawn = toMove $ pawnPossibs b c s
-  | pt == King = toMove $ kingPossibs b c s
-  | pt == Queen = do
-    bi <- bishopPossibs b c s
-    r <- rookPossibs b c s
-    return $ map (\z -> Move piece z s) (bi ++ r)
-  | otherwise = error "Unknow piece please report this as a bug"
+  | otherwise =
+    case pt of
+      Rook -> toMove $ rookPossibs b c s
+      Bishop -> toMove $ bishopPossibs b c s
+      Knight -> toMove $ knightPossibs b c s
+      Pawn -> toMove $ pawnPossibs b c s
+      King -> toMove $ kingPossibs b c s
+      Queen -> do
+        bi <- bishopPossibs b c s
+        r <- rookPossibs b c s
+        return $ map (\z -> Move piece z s) (bi ++ r)
   where
     piece = b !! y !! x
     pt = pieceType piece
