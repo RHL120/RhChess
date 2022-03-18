@@ -49,8 +49,8 @@ drawPiece = drawOnSquare . pieceToString
 
 drawMove :: Lib.Move -> Diagram B
 drawMove (Lib.Move _ dst src)
-  | (squareToPoint dst) == (squareToPoint src) = mempty
-  | otherwise = arrowBetween (squareToPoint src) (squareToPoint (dst))
+  | squareToPoint dst == squareToPoint src = mempty
+  | otherwise = arrowBetween (squareToPoint src) (squareToPoint dst)
 
 drawMoves :: [Lib.Move] -> Diagram B
 drawMoves = mconcat . map drawMove
