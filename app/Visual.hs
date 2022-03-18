@@ -1,4 +1,6 @@
-module Visual where
+module Visual
+  ( drawBoard
+  ) where
 
 import Data.List.Split
 import Diagrams.Backend.SVG.CmdLine

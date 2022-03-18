@@ -1,4 +1,13 @@
-module Lib where
+module Lib
+  ( Square
+  , PlayerColor(Black, White)
+  , Piece(Piece, Empty)
+  , ChessPieceType(Pawn, Rook, Knight, Bishop, Queen, King)
+  , Move(Move)
+  , Board
+  , parseBoard
+  , getPossibs
+  ) where
 
 import Control.Monad (join)
 import Debug.Trace (trace)
