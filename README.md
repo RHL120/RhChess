@@ -32,4 +32,4 @@ gives out this image
 It does not check whether or not a move causes a check (whether or not the move is legal).
 It does not give a castle move. The reason why is because in order for it to check whether
 or not you are able to castle it should have to record of moves (to see if the king and/or rook
-have moved).
+have moved) for that same reason it can't check for En passant.
