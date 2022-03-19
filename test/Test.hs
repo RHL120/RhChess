@@ -75,3 +75,6 @@ main =
         it "correctly get white's initial moves" $ do
           getPossibs pawnStart (0, 6) `shouldBe`
             Right [Move (wp Pawn) (0, 5) (0, 6), Move (wp Pawn) (0, 4) (0, 6)]
+        it "correctly gets black's attack moves" $ do
+          getPossibs pawnAttack (3, 6) `shouldBe`
+            Right [Move (bp Pawn) (2, 7) (3, 6), Move (bp Pawn) (4, 7) (3, 6)]
