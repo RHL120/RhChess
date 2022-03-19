@@ -7,6 +7,7 @@ module Lib
   , Board
   , parseBoard
   , getPossibs
+  , boardPossibs
   ) where
 
 import Control.Monad (join)
@@ -217,4 +218,4 @@ getPossibs b s@(x, y)
 boardPossibs :: Board -> PlayerColor -> Either String [Move]
 boardPossibs b c =
   filter (\(Move x _ _) -> pieceColor x == c) . concat <$> -- no need to for empty here
-  traverse (getPossibs b) [(x, y) | x <- [1 .. 7], y <- [1 .. 7]]
+  traverse (getPossibs b) [(x, y) | x <- [0 .. 7], y <- [1 .. 7]]
