@@ -42,6 +42,11 @@ startingBoard =
     ]
   ]
 
+pawnStart :: Board
+pawnStart =
+  [replicate 8 Empty, replicate 8 $ bp Pawn] ++
+  replicate 4 (replicate 8 Empty) ++ [replicate 8 $ wp Pawn, replicate 8 Empty]
+
 main :: IO ()
 main =
   hspec $ do
@@ -57,3 +62,8 @@ main =
       it "fails if the piece has an invalid type" $ do
         parseBoard (unlines (replicate 8 $ concat $ "bf" : replicate 7 " ee")) `shouldBe`
           Left "piece f is invalid"
+    describe "Gets moves correctly" $ do
+      describe "It parses pawn moves correctly" $ do
+        it "correctly gets black's initial moves" $ do
+          getPossibs pawnStart (0, 1) `shouldBe`
+            Right [Move (bp Pawn) (0, 2) (0, 1), Move (bp Pawn) (0, 3) (0, 1)]
