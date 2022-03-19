@@ -35,3 +35,10 @@ executable RhChess
                      , split
     hs-source-dirs:   app
     default-language: Haskell2010
+Test-Suite test
+    type:       exitcode-stdio-1.0
+    other-modules: Lib
+    main-is: Test.hs
+    hs-source-dirs: test, app
+    build-depends: base
+                 , hspec

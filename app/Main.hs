@@ -31,8 +31,16 @@ run (Config bp sq) = do
   f <- readFile bp
   either (\x -> do putStrLn $ "error : " ++ x) mainWith (draw f sq)
 
+startingString :: String
+startingString =
+  unlines $
+  ["br bn bb bq bk bb bn br", "bp bp bp bp bp bp bp bp"] ++
+  replicate 4 "ee ee ee ee ee ee ee ee" ++
+  ["wp wp wp wp wp wp wp wp", "wr wn wb wq wk wb wn wr"]
+
 main :: IO ()
 main = do
+  print (parseBoard startingString)
   putStrLn "Diagrams extended argumnets are so stupid so I decided to prompt"
   putStrLn "Where is the board:"
   bp <- getLine
