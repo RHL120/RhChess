@@ -48,3 +48,9 @@ main =
     describe "Parses a board correctly" $ do
       it "can parse the starting board" $ do
         parseBoard startingString `shouldBe` Right startingBoard
+      it "fails if the board is not an 8x8 matrix" $ do
+        parseBoard "" `shouldBe`
+          Left "The string does not provied an 8x8 matrix"
+      it "fails if the piece has an invalid color" $ do
+        parseBoard (unlines (replicate 8 $ concat $ "fp" : replicate 7 " ee")) `shouldBe`
+          Left "fp has no valid color"
