@@ -54,3 +54,6 @@ main =
       it "fails if the piece has an invalid color" $ do
         parseBoard (unlines (replicate 8 $ concat $ "fp" : replicate 7 " ee")) `shouldBe`
           Left "fp has no valid color"
+      it "fails if the piece has an invalid type" $ do
+        parseBoard (unlines (replicate 8 $ concat $ "bf" : replicate 7 " ee")) `shouldBe`
+          Left "piece f is invalid"
