@@ -47,6 +47,11 @@ pawnStart =
   [replicate 8 Empty, replicate 8 $ bp Pawn] ++
   replicate 4 (replicate 8 Empty) ++ [replicate 8 $ wp Pawn, replicate 8 Empty]
 
+pawnAttack :: Board
+pawnAttack =
+  replicate 6 (replicate 8 Empty) ++
+  [replicate 8 $ bp Pawn, replicate 8 $ wp Pawn]
+
 main :: IO ()
 main =
   hspec $ do
@@ -67,3 +72,6 @@ main =
         it "correctly gets black's initial moves" $ do
           getPossibs pawnStart (0, 1) `shouldBe`
             Right [Move (bp Pawn) (0, 2) (0, 1), Move (bp Pawn) (0, 3) (0, 1)]
+        it "correctly get white's initial moves" $ do
+          getPossibs pawnStart (0, 6) `shouldBe`
+            Right [Move (wp Pawn) (0, 5) (0, 6), Move (wp Pawn) (0, 4) (0, 6)]
