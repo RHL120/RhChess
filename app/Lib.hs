@@ -151,27 +151,28 @@ rookPossibs b c s@(x, y)
       , [(x - n, y) | n <- [1 .. 7]]
       ]
 
+advancePawnMoves :: Board -> PlayerColor -> Square -> [Square]
+advancePawnMoves b c s@(x, y)
+  | c == Black && y == 1 = takeWhile checker [(x, y + 1), (x, y + 2)]
+  | c == Black = filter checker [(x, y + 1)]
+  | c == White && y == 6 = takeWhile checker [(x, y - 1), (x, y - 2)]
+  | c == White = filter checker [(x, y - 1)]
+  | otherwise = undefined
+  where
+    checker s@(nx, ny) = isValidSquare s && b !! ny !! nx == Empty
+
+pawnAttackMoves :: Board -> PlayerColor -> Square -> [Square]
+pawnAttackMoves b c s@(x, y)
+  | c == Black = filter checker [(x - 1, y + 1), (x + 1, y + 1)]
+  | otherwise = filter checker [(x - 1, y - 1), (x + 1, y - 1)]
+  where
+    checker s@(nx, ny) = isValidSquare s && b !! ny !! nx /= Empty
+
 pawnPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-pawnPossibs b c s@(x, y)
+pawnPossibs b c s
   | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
   | not $ isValidSquare s = Left "Invalid square"
-  | otherwise =
-    Right
-      (filter (\z -> isValidSquare z && isFree b c z == Right True) ps ++
-       attacks)
-  where
-    ps =
-      if c == Black
-        then (x, y + 1) : [(x, y + 2) | y == 1]
-        else (x, y - 1) : [(x, y - 2) | y == 6]
-    attacks =
-      filter
-        (\z -> isValidSquare z && notFriend z)
-        (if c == Black
-           then [(x - 1, y + 1), (x + 1, y + 1)]
-           else [(x - 1, y - 1), (x + 1, y - 1)])
-    notFriend (x, y) =
-      not (b !! y !! x == Empty || pieceColor (b !! y !! x) == c)
+  | otherwise = Right $ advancePawnMoves b c s ++ pawnAttackMoves b c s
 
 kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
 kingPossibs b c s@(x, y)
