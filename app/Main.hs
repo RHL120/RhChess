@@ -16,15 +16,21 @@ data Config =
     , square :: [Square]
     }
 
--- TODO: Use Maybe
--- TODO: Allow multiple squares
 getSquare :: IO [Square]
 getSquare = do
   sq <- getLine
   case sq of
-    str@('(':_) -> either (const exitFailure) (\x -> return [x]) (readEither sq)
-    str@('[':_) -> either (const exitFailure) return (readEither sq)
-    _ -> return [(x, y) | x <- [0 .. 7], y <- [0 .. 7]]
+    str@('(':_) ->
+      either
+        (\x -> putStrLn "failed to parser input" >> exitFailure)
+        (\x -> return [x])
+        (readEither sq)
+    str@('[':_) ->
+      either
+        (\x -> putStrLn "failed to parse input" >> exitFailure)
+        return
+        (readEither sq)
+    _ -> [(x, y) | x <- [0 .. 7], y <- [0 .. 7]] <$ putStrLn "Getting all moves"
 
 draw :: String -> [Square] -> Either String (Diagram B)
 draw x y = do
