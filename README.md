@@ -26,7 +26,7 @@ wr wn wb wq wk wb wn wr
 ```
 gives out this image
 
-![Alt text](https://raw.githubusercontent.com/RHL120/RhChess/master/test.svg "example")
+![Alt text](https://raw.githubusercontent.com/RHL120/RhChess/48204d84b7b9777888d849cacc74dec38b2390ea/test.svg "example")
 
 # What it does not check for
 It does not check whether or not a move causes a check (whether or not the move is legal).
