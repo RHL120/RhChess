@@ -62,6 +62,30 @@ moveChecker piece src expected result =
         then Nothing
         else Just result
 
+rookBoard :: Board
+rookBoard =
+  [replicate 8 Empty, replicate 3 Empty ++ [bp Pawn] ++ replicate 4 Empty] ++
+  replicate 2 (replicate 8 Empty) ++
+  [replicate 3 Empty ++ [bp Rook] ++ replicate 4 Empty] ++
+  replicate 2 (replicate 8 Empty) ++
+  [replicate 3 Empty ++ [wp Pawn] ++ replicate 4 Empty]
+
+rookMoves :: [Square]
+rookMoves =
+  [ (3, 5)
+  , (3, 6)
+  , (3, 7)
+  , (3, 3)
+  , (3, 2)
+  , (4, 4)
+  , (5, 4)
+  , (6, 4)
+  , (7, 4)
+  , (2, 4)
+  , (1, 4)
+  , (0, 4)
+  ]
+
 main :: IO ()
 main =
   hspec $ do
@@ -78,22 +102,19 @@ main =
         parseBoard (unlines (replicate 8 $ concat $ "bf" : replicate 7 " ee")) `shouldBe`
           Left "piece f is invalid"
     describe "Gets moves correctly" $ do
+      it "correctly gets a rook's moves" $ do
+        moveChecker (bp Rook) (3, 4) rookMoves <$>
+          getPossibs rookBoard (3, 4) `shouldBe` Right Nothing
       describe "It parses pawn moves correctly" $ do
         it "correctly gets black's initial moves" $ do
           moveChecker (bp Pawn) (0, 1) [(0, 2), (0, 3)] <$>
-            getPossibs pawnStart (0, 1) `shouldBe`
-            --Right [Move (bp Pawn) (0, 2) (0, 1), Move (bp Pawn) (0, 3) (0, 1)]
-            Right Nothing
+            getPossibs pawnStart (0, 1) `shouldBe` Right Nothing
         it "correctly get white's initial moves" $ do
           moveChecker (wp Pawn) (0, 6) [(0, 5), (0, 4)] <$>
             getPossibs pawnStart (0, 6) `shouldBe` Right Nothing
         it "correctly gets black's attack moves" $ do
           moveChecker (bp Pawn) (3, 6) [(2, 7), (4, 7)] <$>
             getPossibs pawnAttack (3, 6) `shouldBe` Right Nothing
-          --getPossibs pawnAttack (3, 6) `shouldBe`
-           -- Right [Move (bp Pawn) (2, 7) (3, 6), Move (bp Pawn) (4, 7) (3, 6)]
         it "correctly gets white's attack moves" $ do
           moveChecker (wp Pawn) (3, 7) [(2, 6), (4, 6)] <$>
             getPossibs pawnAttack (3, 7) `shouldBe` Right Nothing
-          --getPossibs pawnAttack (3, 7) `shouldBe`
-           -- Right [Move (wp Pawn) (2, 6) (3, 7), Move (wp Pawn) (4, 6) (3, 7)]
