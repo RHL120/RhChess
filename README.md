@@ -15,14 +15,14 @@ each row contains 8 columns and the board contains 8 rows. Empty columns are rep
 ## Example
 this variation
 ```
+br bn bb bq bk bb bn br
+bp bp bp ee bp bp bp bp
 ee ee ee ee ee ee ee ee
 ee ee ee ee ee ee ee ee
-ee ee ee ee ee ee ee ee
-ee ee ee bq ee ee ee ee
-ee ee ee ee ee ee ee ee
-ee ee ee ee ee ee ee ee
-ee ee ee ee bn ee ee ee
-ee ee ee ee ee ee ee ee
+ee ee bp wp ee ee ee ee
+ee ee ee ee wp ee ee ee
+wp wp ee ee ee wp wp wp
+wr wn wb wq wk wb wn wr
 ```
 gives out this image
 
