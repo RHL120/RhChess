@@ -52,6 +52,16 @@ pawnAttack =
   replicate 6 (replicate 8 Empty) ++
   [replicate 8 $ bp Pawn, replicate 8 $ wp Pawn]
 
+--If the are the same return Nothign otherwise return Just result
+moveChecker :: Piece -> Square -> [Square] -> [Move] -> Maybe [Move]
+moveChecker piece src expected result =
+  let moves = map (\x -> Move piece x src) expected
+   --check if they have the same elements but maybe not in the same order
+   in if filter (`elem` result) moves == moves &&
+         filter (`elem` moves) result == result && length result == length moves
+        then Nothing
+        else Just result
+
 main :: IO ()
 main =
   hspec $ do
@@ -70,14 +80,20 @@ main =
     describe "Gets moves correctly" $ do
       describe "It parses pawn moves correctly" $ do
         it "correctly gets black's initial moves" $ do
-          getPossibs pawnStart (0, 1) `shouldBe`
-            Right [Move (bp Pawn) (0, 2) (0, 1), Move (bp Pawn) (0, 3) (0, 1)]
+          moveChecker (bp Pawn) (0, 1) [(0, 2), (0, 3)] <$>
+            getPossibs pawnStart (0, 1) `shouldBe`
+            --Right [Move (bp Pawn) (0, 2) (0, 1), Move (bp Pawn) (0, 3) (0, 1)]
+            Right Nothing
         it "correctly get white's initial moves" $ do
-          getPossibs pawnStart (0, 6) `shouldBe`
-            Right [Move (wp Pawn) (0, 5) (0, 6), Move (wp Pawn) (0, 4) (0, 6)]
+          moveChecker (wp Pawn) (0, 6) [(0, 5), (0, 4)] <$>
+            getPossibs pawnStart (0, 6) `shouldBe` Right Nothing
         it "correctly gets black's attack moves" $ do
-          getPossibs pawnAttack (3, 6) `shouldBe`
-            Right [Move (bp Pawn) (2, 7) (3, 6), Move (bp Pawn) (4, 7) (3, 6)]
+          moveChecker (bp Pawn) (3, 6) [(2, 7), (4, 7)] <$>
+            getPossibs pawnAttack (3, 6) `shouldBe` Right Nothing
+          --getPossibs pawnAttack (3, 6) `shouldBe`
+           -- Right [Move (bp Pawn) (2, 7) (3, 6), Move (bp Pawn) (4, 7) (3, 6)]
         it "correctly gets white's attack moves" $ do
-          getPossibs pawnAttack (3, 7) `shouldBe`
-            Right [Move (wp Pawn) (2, 6) (3, 7), Move (wp Pawn) (4, 6) (3, 7)]
+          moveChecker (wp Pawn) (3, 7) [(2, 6), (4, 6)] <$>
+            getPossibs pawnAttack (3, 7) `shouldBe` Right Nothing
+          --getPossibs pawnAttack (3, 7) `shouldBe`
+           -- Right [Move (wp Pawn) (2, 6) (3, 7), Move (wp Pawn) (4, 6) (3, 7)]
