@@ -4,26 +4,32 @@ import Lib
 import Visual
 
 import Data.Either (either)
+import Data.Maybe (fromMaybe)
 import Diagrams.Backend.SVG.CmdLine (B, mainWith)
 import Diagrams.Prelude (Diagram)
 import System.Exit (exitFailure)
-import Text.Read (readEither)
+import Text.Read (readEither, readMaybe)
 
 data Config =
   Config
     { boardPath :: FilePath
-    , square :: Square
+    , square :: [Square]
     }
 
 -- TODO: Use Maybe
 -- TODO: Allow multiple squares
-getSquare :: IO Square
-getSquare = (read :: String -> Square) <$> getLine
+getSquare :: IO [Square]
+getSquare = do
+  sq <- getLine
+  case sq of
+    str@('(':_) -> either (const exitFailure) (\x -> return [x]) (readEither sq)
+    str@('[':_) -> either (const exitFailure) return (readEither sq)
+    _ -> return [(x, y) | x <- [0 .. 7], y <- [0 .. 7]]
 
-draw :: String -> Square -> Either String (Diagram B)
+draw :: String -> [Square] -> Either String (Diagram B)
 draw x y = do
   b <- parseBoard x
-  moves <- getPossibs b y
+  moves <- concat <$> traverse (getPossibs b) y
   return (drawBoard b moves)
 
 run :: Config -> IO ()
