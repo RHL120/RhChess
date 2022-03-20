@@ -48,6 +48,16 @@ data Move =
     }
   deriving (Show, Eq)
 
+checkInput ::
+     (Board -> Square -> Either String b)
+  -> (Board -> Square -> Either String b)
+checkInput f = g
+  where
+    g b s
+      | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
+      | not $ isValidSquare s = Left "Square is not valid"
+      | otherwise = f b s
+
 filterBlocked :: Board -> PlayerColor -> [Square] -> Either String [Square]
 filterBlocked board color squares
   | not $ boardIsFit board = Left "square is not valid"
@@ -98,100 +108,91 @@ isValidSquare :: Square -> Bool
 isValidSquare (x, y) = x < 8 && x >= 0 && y < 8 && y >= 0
 
 isFree :: Board -> PlayerColor -> Square -> Either String Bool
-isFree b color s@(x, y)
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Square is not valid"
-  | piece == Empty || pieceColor piece /= color = Right True
-  | otherwise = Right False
+isFree board color = checkInput f board
   where
-    piece = b !! y !! x
+    f b (x, y)
+      | piece == Empty || pieceColor piece /= color = Right True
+      | otherwise = Right False
+      where
+        piece = b !! y !! x
 
 knightPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-knightPossibs b c s@(x, y)
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Square is not valid"
-  | otherwise =
-    Right $
-    filter
-      (\z -> isValidSquare z && isFree b c z == Right True)
-      [ (x + 1, y + 2)
-      , (x - 1, y + 2)
-      , (x - 2, y + 1)
-      , (x - 2, y - 1)
-      , (x - 1, y - 2)
-      , (x + 1, y - 2)
-      , (x + 2, y - 1)
-      , (x + 2, y + 1)
-      ]
+knightPossibs board c = checkInput f board
+  where
+    f b (x, y) =
+      Right $
+      filter
+        (\z -> isValidSquare z && isFree b c z == Right True)
+        [ (x + 1, y + 2)
+        , (x - 1, y + 2)
+        , (x - 2, y + 1)
+        , (x - 2, y - 1)
+        , (x - 1, y - 2)
+        , (x + 1, y - 2)
+        , (x + 2, y - 1)
+        , (x + 2, y + 1)
+        ]
 
 bishopPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-bishopPossibs b c s@(x, y)
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Square is not valid"
-  | otherwise =
-    concat <$>
-    traverse
-      (filterBlocked b c . filter isValidSquare)
-      [ [(x - n, y - n) | n <- [1 .. 7]]
-      , [(x + n, y + n) | n <- [1 .. 7]]
-      , [(x + n, y - n) | n <- [1 .. 7]]
-      , [(x - n, y + n) | n <- [1 .. 7]]
-      ]
+bishopPossibs board c = checkInput f board
+  where
+    f b (x, y) =
+      concat <$>
+      traverse
+        (filterBlocked b c . filter isValidSquare)
+        [ [(x - n, y - n) | n <- [1 .. 7]]
+        , [(x + n, y + n) | n <- [1 .. 7]]
+        , [(x + n, y - n) | n <- [1 .. 7]]
+        , [(x - n, y + n) | n <- [1 .. 7]]
+        ]
 
 rookPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-rookPossibs b c s@(x, y)
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Square is not valid"
-  | otherwise =
-    concat <$>
-    traverse
-      (filterBlocked b c . filter isValidSquare)
-      [ [(x, y + n) | n <- [1 .. 7]]
-      , [(x, y - n) | n <- [1 .. 7]]
-      , [(x + n, y) | n <- [1 .. 7]]
-      , [(x - n, y) | n <- [1 .. 7]]
-      ]
-
-advancePawnMoves :: Board -> PlayerColor -> Square -> [Square]
-advancePawnMoves b c s@(x, y)
-  | c == Black && y == 1 = takeWhile checker [(x, y + 1), (x, y + 2)]
-  | c == Black = filter checker [(x, y + 1)]
-  | c == White && y == 6 = takeWhile checker [(x, y - 1), (x, y - 2)]
-  | c == White = filter checker [(x, y - 1)]
-  | otherwise = undefined
+rookPossibs board c = checkInput f board
   where
-    checker s@(nx, ny) = isValidSquare s && b !! ny !! nx == Empty
-
-pawnAttackMoves :: Board -> PlayerColor -> Square -> [Square]
-pawnAttackMoves b c s@(x, y)
-  | c == Black = filter checker [(x - 1, y + 1), (x + 1, y + 1)]
-  | otherwise = filter checker [(x - 1, y - 1), (x + 1, y - 1)]
-  where
-    checker s@(nx, ny) = isValidSquare s && b !! ny !! nx /= Empty
+    f b (x, y) =
+      concat <$>
+      traverse
+        (filterBlocked b c . filter isValidSquare)
+        [ [(x, y + n) | n <- [1 .. 7]]
+        , [(x, y - n) | n <- [1 .. 7]]
+        , [(x + n, y) | n <- [1 .. 7]]
+        , [(x - n, y) | n <- [1 .. 7]]
+        ]
 
 pawnPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-pawnPossibs b c s
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Invalid square"
-  | otherwise = Right $ advancePawnMoves b c s ++ pawnAttackMoves b c s
+pawnPossibs board c = checkInput f board
+  where
+    f b s = Right $ apm b c s ++ pam b c s
+    apm b c s@(x, y)
+      | c == Black && y == 1 = takeWhile checker [(x, y + 1), (x, y + 2)]
+      | c == Black = filter checker [(x, y + 1)]
+      | c == White && y == 6 = takeWhile checker [(x, y - 1), (x, y - 2)]
+      | c == White = filter checker [(x, y - 1)]
+      | otherwise = undefined
+      where
+        checker s@(nx, ny) = isValidSquare s && board !! ny !! nx == Empty
+    pam b c s@(x, y)
+      | c == Black = filter checker [(x - 1, y + 1), (x + 1, y + 1)]
+      | otherwise = filter checker [(x - 1, y - 1), (x + 1, y - 1)]
+      where
+        checker s@(nx, ny) = isValidSquare s && board !! ny !! nx /= Empty
 
 kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
-kingPossibs b c s@(x, y)
-  | not $ boardIsFit b = Left "Board is not an 8x8 matrix"
-  | not $ isValidSquare s = Left "Invlid square"
-  | otherwise =
-    Right $
-    filter
-      (\z -> isValidSquare z && isFree b c z == Right True)
-      [ (x + 1, y)
-      , (x - 1, y)
-      , (x + 1, y + 1)
-      , (x + 1, y - 1)
-      , (x, y - 1)
-      , (x, y + 1)
-      , (x - 1, y + 1)
-      , (x - 1, y - 1)
-      ]
+kingPossibs board c = checkInput f board
+  where
+    f b s@(x, y) =
+      Right $
+      filter
+        (\z -> isValidSquare z && isFree b c z == Right True)
+        [ (x + 1, y)
+        , (x - 1, y)
+        , (x + 1, y + 1)
+        , (x + 1, y - 1)
+        , (x, y - 1)
+        , (x, y + 1)
+        , (x - 1, y + 1)
+        , (x - 1, y - 1)
+        ]
 
 getPossibs :: Board -> Square -> Either String [Move]
 getPossibs b s@(x, y)
