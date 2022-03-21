@@ -150,7 +150,7 @@ main =
       it "correctly gets a Knight's move" $ do
         moveChecker (bp Knight) (3, 3) knightMoves <$>
           getPossibs knightBoard (3, 3) `shouldBe` Right Nothing
-      describe "It parses pawn moves correctly" $ do
+      describe "It gets pawn moves correctly" $ do
         it "correctly gets black's initial moves" $ do
           moveChecker (bp Pawn) (0, 1) [(0, 2), (0, 3)] <$>
             getPossibs pawnStart (0, 1) `shouldBe` Right Nothing
