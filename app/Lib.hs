@@ -175,7 +175,10 @@ pawnPossibs board c = checkInput f board
       | c == Black = filter checker [(x - 1, y + 1), (x + 1, y + 1)]
       | otherwise = filter checker [(x - 1, y - 1), (x + 1, y - 1)]
       where
-        checker s@(nx, ny) = isValidSquare s && board !! ny !! nx /= Empty
+        checker s@(nx, ny) =
+          isValidSquare s && piece /= Empty && pieceColor piece /= c
+          where
+            piece = board !! ny !! nx
 
 kingPossibs :: Board -> PlayerColor -> Square -> Either String [Square]
 kingPossibs board c = checkInput f board
