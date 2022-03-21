@@ -113,6 +113,18 @@ bishopMoves =
   , (1, 7)
   ]
 
+knightBoard :: Board
+knightBoard =
+  replicate 3 (replicate 8 Empty) ++
+  [ [Empty, Empty, Empty, bp Knight, Empty, Empty, Empty, Empty]
+  , replicate 8 Empty
+  , [Empty, Empty, bp Pawn, Empty, wp Pawn, Empty, Empty, Empty]
+  ] ++
+  replicate 2 (replicate 8 Empty)
+
+knightMoves :: [Square]
+knightMoves = [(4, 5), (1, 4), (1, 2), (2, 1), (4, 1), (5, 2), (5, 4)]
+
 main :: IO ()
 main =
   hspec $ do
@@ -135,6 +147,9 @@ main =
       it "correctly gets a bishop's moves" $ do
         moveChecker (bp Bishop) (4, 4) bishopMoves <$>
           getPossibs bishopBoard (4, 4) `shouldBe` Right Nothing
+      it "correctly gets a Knight's move" $ do
+        moveChecker (bp Knight) (3, 3) knightMoves <$>
+          getPossibs knightBoard (3, 3) `shouldBe` Right Nothing
       describe "It parses pawn moves correctly" $ do
         it "correctly gets black's initial moves" $ do
           moveChecker (bp Pawn) (0, 1) [(0, 2), (0, 3)] <$>
