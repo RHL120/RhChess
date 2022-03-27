@@ -1,13 +1,12 @@
 module Lib
   ( Square
-  , PlayerColor(Black, White)
-  , Piece(Piece, Empty)
-  , ChessPieceType(Pawn, Rook, Knight, Bishop, Queen, King)
-  , Move(Move)
+  , PlayerColor(..)
+  , Piece(..)
+  , ChessPieceType(..)
+  , Move(..)
   , Board
   , parseBoard
   , getPossibs
-  , boardPossibs
   ) where
 
 import Control.Monad (join)
@@ -218,8 +217,3 @@ getPossibs b s@(x, y)
     pt = pieceType piece
     c = pieceColor piece
     toMove = join . Right . fmap (map (\z -> Move piece z s))
-
-boardPossibs :: Board -> PlayerColor -> Either String [Move]
-boardPossibs b c =
-  filter (\(Move x _ _) -> pieceColor x == c) . concat <$> -- no need to for empty here
-  traverse (getPossibs b) [(x, y) | x <- [0 .. 7], y <- [1 .. 7]]
