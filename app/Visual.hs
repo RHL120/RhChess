@@ -27,9 +27,6 @@ squareToPoint (x, y) = fromIntegral x ^& negate (fromIntegral y)
 drawOnSquare :: Diagram B -> Lib.Square -> Diagram B
 drawOnSquare d s = d # moveTo (squareToPoint s)
 
-pawnString :: Colour Double -> Diagram B
-pawnString c = text "P" # fc c
-
 pieceToString :: Lib.Piece -> Diagram B
 pieceToString Lib.Empty = mempty
 pieceToString (Lib.Piece c t)
